@@ -2,8 +2,11 @@ package com.structurizr.server.domain;
 
 import com.structurizr.configuration.Configuration;
 import com.structurizr.configuration.StructurizrProperties;
+import com.structurizr.server.web.security.ApiAuthenticationUtils;
 import com.structurizr.util.DateUtils;
 import com.structurizr.util.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.text.ParseException;
@@ -13,6 +16,8 @@ import java.util.*;
 import static com.structurizr.util.DateUtils.UTC_TIME_ZONE;
 
 public class WorkspaceMetadata {
+
+    private static final Log log = LogFactory.getLog(WorkspaceMetadata.class);
 
     public static final int LOCK_TIMEOUT_IN_MINUTES = 2;
 
@@ -129,8 +134,16 @@ public class WorkspaceMetadata {
         String adminApiKey = Configuration.getInstance().getProperty(StructurizrProperties.API_KEY);
         if (!StringUtils.isNullOrEmpty(adminApiKey)) {
             // does the given API key match the bcrypt encoded admin API key?
-            return bcryptEncoder.matches(key, adminApiKey);
+            if (bcryptEncoder.matches(key, adminApiKey)) {
+                return true;
+            }
         }
+
+        if (ApiAuthenticationUtils.isSharedApiTokenValid(key)) {
+            return true;
+        }
+
+        log.warn("Workspace API credential rejected");
 
         return false;
     }

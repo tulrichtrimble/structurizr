@@ -15,27 +15,44 @@ public class NoOpAdminApiController extends AbstractController {
 
     private static final String MESSAGE = "The admin API is not supported in the open core version of the Structurizr server";
 
+    private String resolveApiCredential(String xAuthorization, String authorization) {
+        if (xAuthorization != null && !xAuthorization.trim().isEmpty()) {
+            return xAuthorization;
+        }
+
+        return authorization;
+    }
+
     @RequestMapping(value = "/api/workspace", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
     public void getWorkspaces(
-            @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey
+            @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String xAuthorization,
+            @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization
     ) {
+
+        String apiKey = resolveApiCredential(xAuthorization, authorization);
 
         throw new ApiException(MESSAGE);
     }
 
     @RequestMapping(value = "/api/workspace", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
     public void createWorkspace(
-            @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey
+            @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String xAuthorization,
+            @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization
     ) {
+
+        String apiKey = resolveApiCredential(xAuthorization, authorization);
 
         throw new ApiException(MESSAGE);
     }
 
     @RequestMapping(value = "/api/workspace/{workspaceId}", method = RequestMethod.DELETE, produces = "application/json; charset=UTF-8")
     public void deleteWorkspace(
-            @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey,
+            @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String xAuthorization,
+            @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
             @PathVariable("workspaceId") long workspaceId
     ) {
+
+        String apiKey = resolveApiCredential(xAuthorization, authorization);
 
         throw new ApiException(MESSAGE);
     }

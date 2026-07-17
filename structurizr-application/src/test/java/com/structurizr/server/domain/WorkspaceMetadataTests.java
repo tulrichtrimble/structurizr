@@ -1,10 +1,13 @@
 package com.structurizr.server.domain;
 
 import com.structurizr.configuration.StructurizrProperties;
+import com.structurizr.server.web.security.ApiAuthenticationUtils;
 import com.structurizr.server.web.AbstractTestsBase;
 import com.structurizr.util.DateUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -482,6 +485,44 @@ public class WorkspaceMetadataTests extends AbstractTestsBase {
         assertFalse(wmd.getPermissions(read).contains(Permission.Admin));
         assertFalse(wmd.getPermissions(read).contains(Permission.Write));
         assertTrue(wmd.getPermissions(read).contains(Permission.Read));
+    }
+
+    @Test
+    void isApiKeyValid_ReturnsTrue_WhenConfiguredSharedApiTokenMatches() {
+        Properties properties = new Properties();
+        properties.setProperty(StructurizrProperties.AUTHENTICATION_API_SHARED_TOKEN, "shared-upload-token");
+        configureAsServerWithAuthenticationEnabled(properties);
+
+        WorkspaceMetadata workspace = new WorkspaceMetadata(1);
+        workspace.setApiKey("workspace-api-key");
+
+        assertTrue(workspace.isApiKeyValid("shared-upload-token"));
+    }
+
+    @Test
+    void isApiKeyValid_ReturnsTrue_WhenConfiguredJwtTokenIsValid() {
+        Properties properties = new Properties();
+        properties.setProperty(StructurizrProperties.AUTHENTICATION_API_TOKEN_ISSUER_URI, "https://id.trimble.com");
+        properties.setProperty(StructurizrProperties.AUTHENTICATION_API_TOKEN_JWK_SET_URI, "https://id.trimble.com/.well-known/jwks.json");
+        properties.setProperty(StructurizrProperties.AUTHENTICATION_API_TOKEN_AUDIENCE, "structurizr-upload");
+        properties.setProperty(StructurizrProperties.AUTHENTICATION_API_TOKEN_SCOPES, "structurizr.upload");
+        configureAsServerWithAuthenticationEnabled(properties);
+
+        ApiAuthenticationUtils.setJwtDecoderOverrideForTesting(token -> Jwt.withTokenValue(token)
+                .header("alg", "RS256")
+                .issuer("https://id.trimble.com")
+                .audience(List.of("structurizr-upload"))
+                .claim("scope", "structurizr.upload")
+                .issuedAt(Instant.now().minusSeconds(30))
+                .expiresAt(Instant.now().plusSeconds(300))
+                .build());
+
+        WorkspaceMetadata workspace = new WorkspaceMetadata(1);
+        workspace.setApiKey("workspace-api-key");
+
+        assertTrue(workspace.isApiKeyValid("jwt-token"));
+
+        ApiAuthenticationUtils.clearJwtDecoderOverrideForTesting();
     }
 
 }

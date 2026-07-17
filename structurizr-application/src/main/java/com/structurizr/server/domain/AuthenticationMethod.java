@@ -4,6 +4,7 @@ public enum AuthenticationMethod {
 
     NONE,
     LOCAL,
+    OIDC,
     SAML
 
 }

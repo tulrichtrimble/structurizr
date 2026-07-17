@@ -13,7 +13,10 @@ import com.structurizr.server.domain.WorkspaceMetadata;
 import com.structurizr.util.DateUtils;
 import com.structurizr.util.ImageUtils;
 import com.structurizr.util.StringUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,13 +41,31 @@ import java.util.stream.Collectors;
 @org.springframework.context.annotation.Profile("command-server")
 public class ServerWorkspaceApiController extends AbstractWorkspaceApiController {
 
+    private String resolveApiCredential(String apiKey) {
+        if (!StringUtils.isNullOrEmpty(apiKey)) {
+            return apiKey;
+        }
+
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (requestAttributes == null) {
+            return apiKey;
+        }
+
+        HttpServletRequest request = requestAttributes.getRequest();
+        if (request == null) {
+            return apiKey;
+        }
+
+        return request.getHeader(HttpHeaders.AUTHORIZATION);
+    }
+
     @CrossOrigin
     @RequestMapping(value = "/api/workspace/{workspaceId}", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
     public String getWorkspace(@PathVariable("workspaceId") long workspaceId,
                                @RequestParam(required = false) String version,
                                @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey) {
 
-        return get(workspaceId, WorkspaceBranch.MAIN_BRANCH, version, apiKey);
+        return get(workspaceId, WorkspaceBranch.MAIN_BRANCH, version, resolveApiCredential(apiKey));
     }
 
     @CrossOrigin
@@ -53,7 +74,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
                                                   @RequestBody String json,
                                                   @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey) {
 
-        return put(workspaceId, WorkspaceBranch.MAIN_BRANCH, json, apiKey);
+        return put(workspaceId, WorkspaceBranch.MAIN_BRANCH, json, resolveApiCredential(apiKey));
     }
 
     @CrossOrigin
@@ -62,7 +83,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
                                @PathVariable("branch") String branch,
                                @RequestParam(required = false) String version,
                                @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey) {
-        return get(workspaceId, branch, version, apiKey);
+        return get(workspaceId, branch, version, resolveApiCredential(apiKey));
     }
 
     @CrossOrigin
@@ -71,7 +92,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
                                                   @PathVariable("branch") String branch,
                                                   @RequestBody String json,
                                                   @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey) {
-        return put(workspaceId, branch, json, apiKey);
+        return put(workspaceId, branch, json, resolveApiCredential(apiKey));
     }
 
     @RequestMapping(value = "/api/workspace/{workspaceId}/branch", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
@@ -82,7 +103,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
             throw new ApiException("Workspace branches are not enabled for this installation");
         }
 
-        authoriseRequest(workspaceId, Permission.Read, apiKey);
+        authoriseRequest(workspaceId, Permission.Read, resolveApiCredential(apiKey));
 
         try {
             List<WorkspaceBranch> branches = workspaceComponent.getWorkspaceBranches(workspaceId);
@@ -113,7 +134,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
             throw new ApiException("Workspace branches are not enabled for this installation");
         }
 
-        authoriseRequest(workspaceId, Permission.Write, apiKey);
+        authoriseRequest(workspaceId, Permission.Write, resolveApiCredential(apiKey));
 
         if (WorkspaceBranch.isMainBranch(branch)) {
             throw new ApiException("The main branch cannot be deleted");
@@ -140,7 +161,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
             user = u.getUsername();
         }
 
-        authoriseRequest(workspaceId, Permission.Write, apiKey);
+        authoriseRequest(workspaceId, Permission.Write, resolveApiCredential(apiKey));
 
         if (workspaceComponent.lockWorkspace(workspaceId, user, agent)) {
             return new ApiResponse("OK");
@@ -163,7 +184,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
             user = u.getUsername();
         }
 
-        authoriseRequest(workspaceId, Permission.Write, apiKey);
+        authoriseRequest(workspaceId, Permission.Write, resolveApiCredential(apiKey));
 
         WorkspaceMetadata workspaceMetadata = workspaceComponent.getWorkspaceMetadata(workspaceId);
         if (workspaceMetadata.isLockedBy(user, agent)) {
@@ -183,7 +204,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
                                               @RequestBody String imageAsBase64EncodedDataUri,
                                               @RequestHeader(name = HttpHeaders.X_AUTHORIZATION, required = false) String apiKey) {
 
-        return storeImage(workspaceId, WorkspaceBranch.NO_BRANCH, filename, imageAsBase64EncodedDataUri, apiKey);
+        return storeImage(workspaceId, WorkspaceBranch.NO_BRANCH, filename, imageAsBase64EncodedDataUri, resolveApiCredential(apiKey));
     }
 
     @RequestMapping(value = "/api/workspace/{workspaceId}/branch/{branch}/images/{filename:.+}", method = RequestMethod.PUT, consumes = "text/plain", produces = "application/json; charset=UTF-8")
@@ -197,7 +218,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
             throw new ApiException("Workspace branches are not enabled for this installation");
         }
 
-        return storeImage(workspaceId, branch, filename, imageAsBase64EncodedDataUri, apiKey);
+        return storeImage(workspaceId, branch, filename, imageAsBase64EncodedDataUri, resolveApiCredential(apiKey));
     }
 
     private ApiResponse storeImage(long workspaceId, String branch, String filename, String imageAsBase64EncodedDataUri, String apiKey) {
