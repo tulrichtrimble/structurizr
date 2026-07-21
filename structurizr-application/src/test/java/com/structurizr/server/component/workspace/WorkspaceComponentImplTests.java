@@ -332,6 +332,70 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
     }
 
     @Test
+    void getWorkspaceMetaDataByName_WhenTheWorkspaceExists() {
+        WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(1);
+        workspaceMetadata.setName("Dewey");
+
+        workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public List<Long> getWorkspaceIds() {
+                return List.of(1L);
+            }
+
+            @Override
+            public WorkspaceMetadata getWorkspaceMetadata(long workspaceId) {
+                return workspaceMetadata;
+            }
+        });
+
+        assertSame(workspaceMetadata, workspaceComponent.getWorkspaceMetadata("dewey"));
+    }
+
+    @Test
+    void getWorkspaceMetaDataByName_WhenTheWorkspaceIsArchived() {
+        WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(1);
+        workspaceMetadata.setName("Dewey");
+        workspaceMetadata.setArchived(true);
+
+        workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public List<Long> getWorkspaceIds() {
+                return List.of(1L);
+            }
+
+            @Override
+            public WorkspaceMetadata getWorkspaceMetadata(long workspaceId) {
+                return workspaceMetadata;
+            }
+        });
+
+        assertNull(workspaceComponent.getWorkspaceMetadata("dewey"));
+    }
+
+    @Test
+    void getWorkspaceMetaDataByName_ThrowsAnException_WhenMultipleWorkspacesMatch() {
+        WorkspaceMetadata workspaceMetadata1 = new WorkspaceMetadata(1);
+        workspaceMetadata1.setName("Dewey");
+
+        WorkspaceMetadata workspaceMetadata2 = new WorkspaceMetadata(2);
+        workspaceMetadata2.setName("dewey");
+
+        workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public List<Long> getWorkspaceIds() {
+                return List.of(1L, 2L);
+            }
+
+            @Override
+            public WorkspaceMetadata getWorkspaceMetadata(long workspaceId) {
+                return workspaceId == 1L ? workspaceMetadata1 : workspaceMetadata2;
+            }
+        });
+
+        assertThrows(WorkspaceComponentException.class, () -> workspaceComponent.getWorkspaceMetadata("dewey"));
+    }
+
+    @Test
     void putWorkspaceMetadata_ThrowsAnException_WhenPassedNull() {
         workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter());
 

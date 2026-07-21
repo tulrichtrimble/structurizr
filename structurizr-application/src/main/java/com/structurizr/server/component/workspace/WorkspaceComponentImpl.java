@@ -191,6 +191,33 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
     }
 
     @Override
+    public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) throws WorkspaceComponentException {
+        if (StringUtils.isNullOrEmpty(workspaceName)) {
+            throw new IllegalArgumentException("Workspace name cannot be null or empty");
+        }
+
+        String normalizedWorkspaceName = workspaceName.trim();
+        WorkspaceMetadata match = null;
+
+        for (Long workspaceId : workspaceAdapter.getWorkspaceIds()) {
+            WorkspaceMetadata workspaceMetadata = getWorkspaceMetadata(workspaceId);
+            if (workspaceMetadata == null) {
+                continue;
+            }
+
+            if (normalizedWorkspaceName.equalsIgnoreCase(workspaceMetadata.getName())) {
+                if (match != null) {
+                    throw new WorkspaceComponentException("Multiple workspaces found with name: " + workspaceName);
+                }
+
+                match = workspaceMetadata;
+            }
+        }
+
+        return match;
+    }
+
+    @Override
     public void putWorkspaceMetadata(WorkspaceMetadata workspaceMetadata) {
         if (workspaceMetadata == null) {
             throw new IllegalArgumentException("Workspace metadata cannot be null");
