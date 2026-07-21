@@ -56,7 +56,7 @@ public class ServerWorkspaceApiController extends AbstractWorkspaceApiController
             return apiKey;
         }
 
-        return request.getHeader(HttpHeaders.AUTHORIZATION);
+        return request.getHeader(org.springframework.http.HttpHeaders.AUTHORIZATION);
     }
 
     @CrossOrigin

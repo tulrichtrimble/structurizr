@@ -33,36 +33,26 @@ class WorkspaceSummaryController extends AbstractWorkspaceController {
 
     @RequestMapping(value = "/workspace/{workspaceId}", method = RequestMethod.GET)
     public String showAuthenticatedWorkspaceSummary(
-            @PathVariable("workspaceId") String workspaceId,
+            @PathVariable("workspaceId") long workspaceId,
             @RequestParam(required = false, defaultValue = "") String branch,
             @RequestParam(required = false) String version,
             ModelMap model
     ) {
-        Long numericWorkspaceId = parseWorkspaceId(workspaceId);
-        if (numericWorkspaceId == null) {
-            WorkspaceMetadata workspaceMetadata = resolveWorkspaceByName(workspaceId);
-            if (workspaceMetadata == null) {
-                return show404Page(model);
-            }
-
-            return "redirect:" + buildWorkspaceSummaryUrl(workspaceMetadata.getId(), branch, version);
-        }
-
         if (Configuration.getInstance().getProfile() == com.structurizr.configuration.Profile.Local) {
             enableLocalRefresh(model);
         }
 
         return showAuthenticatedView(
-                Views.WORKSPACE_SUMMARY, numericWorkspaceId,
+                Views.WORKSPACE_SUMMARY, workspaceId,
                 workspaceMetadata -> {
                     if (Configuration.getInstance().getProfile() == Profile.Server) {
                         if (Configuration.getInstance().isFeatureEnabled(Features.WORKSPACE_BRANCHES)) {
                             model.addAttribute("branchesEnabled", true);
                             model.addAttribute("branch", branch);
-                            model.addAttribute("branches", workspaceComponent.getWorkspaceBranches(numericWorkspaceId));
+                            model.addAttribute("branches", workspaceComponent.getWorkspaceBranches(workspaceId));
                         }
 
-                        model.addAttribute("versions", workspaceComponent.getWorkspaceVersions(numericWorkspaceId, branch));
+                        model.addAttribute("versions", workspaceComponent.getWorkspaceVersions(workspaceId, branch));
                     }
                 },
                 branch, version, model, true, true
@@ -73,14 +63,6 @@ class WorkspaceSummaryController extends AbstractWorkspaceController {
         try {
             return workspaceComponent.getWorkspaceMetadata(workspaceName);
         } catch (WorkspaceComponentException e) {
-            return null;
-        }
-    }
-
-    private Long parseWorkspaceId(String workspaceId) {
-        try {
-            return Long.parseLong(workspaceId);
-        } catch (NumberFormatException e) {
             return null;
         }
     }

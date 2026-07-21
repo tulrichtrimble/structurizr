@@ -55,7 +55,7 @@ public class WorkspaceSummaryControllerTests extends AbstractTestsBase {
             }
         });
 
-        String view = controller.showAuthenticatedWorkspaceSummary("1", "", "", model);
+        String view = controller.showAuthenticatedWorkspaceSummary(1, "", "", model);
         assertEquals("workspace-summary", view);
         assertSame(workspaceMetaData, model.getAttribute("workspace"));
         assertNull(model.getAttribute("workspaceAsJson"));
@@ -96,7 +96,7 @@ public class WorkspaceSummaryControllerTests extends AbstractTestsBase {
             }
         });
 
-        String view = controller.showAuthenticatedWorkspaceSummary("1", "branch1", "", model);
+        String view = controller.showAuthenticatedWorkspaceSummary(1, "branch1", "", model);
         assertEquals("workspace-summary", view);
         assertSame(workspaceMetaData, model.getAttribute("workspace"));
         assertNull(model.getAttribute("workspaceAsJson"));
@@ -138,7 +138,7 @@ public class WorkspaceSummaryControllerTests extends AbstractTestsBase {
             }
         });
 
-        String view = controller.showAuthenticatedWorkspaceSummary("1", "", "", model);
+        String view = controller.showAuthenticatedWorkspaceSummary(1, "", "", model);
         assertEquals("workspace-summary", view);
         assertSame(workspaceMetaData, model.getAttribute("workspace"));
         assertNull(model.getAttribute("workspaceAsJson"));
@@ -165,39 +165,6 @@ public class WorkspaceSummaryControllerTests extends AbstractTestsBase {
 
         String view = controller.redirectToWorkspaceSummaryByName("dewey", "main", "5", model);
         assertEquals("redirect:/workspace/2?branch=main&version=5", view);
-    }
-
-    @Test
-    void showAuthenticatedWorkspaceSummary_RedirectsNamedWorkspacePathToCanonicalWorkspaceUrl() {
-        configureAsServerWithAuthenticationDisabled();
-
-        WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(2);
-        workspaceMetadata.setName("dewey");
-
-        controller.setWorkspaceComponent(new MockWorkspaceComponent() {
-            @Override
-            public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) {
-                return workspaceMetadata;
-            }
-        });
-
-        String view = controller.showAuthenticatedWorkspaceSummary("dewey", "main", "5", model);
-        assertEquals("redirect:/workspace/2?branch=main&version=5", view);
-    }
-
-    @Test
-    void showAuthenticatedWorkspaceSummary_Returns404WhenNamedWorkspaceLookupFails() {
-        configureAsServerWithAuthenticationDisabled();
-
-        controller.setWorkspaceComponent(new MockWorkspaceComponent() {
-            @Override
-            public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) {
-                throw new WorkspaceComponentException("Duplicate workspace name");
-            }
-        });
-
-        String view = controller.showAuthenticatedWorkspaceSummary("dewey", "", "", model);
-        assertEquals("404", view);
     }
 
 }

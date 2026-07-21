@@ -104,4 +104,13 @@ class ModelItemParserTests extends AbstractTests {
         assertEquals("http://example.com", softwareSystem.getUrl());
     }
 
+    @Test
+    void test_parseUrl_SetsTheUrl_WhenARootRelativeUrlIsSpecified() {
+        SoftwareSystem softwareSystem = model.addSoftwareSystem("Name", "Description");
+        ModelItemDslContext context = new SoftwareSystemDslContext(softwareSystem);
+        parser.parseUrl(context, tokens("url", "/workspace/dewey"));
+
+        assertEquals("/workspace/dewey", softwareSystem.getUrl());
+    }
+
 }

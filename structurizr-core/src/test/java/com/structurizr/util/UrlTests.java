@@ -28,4 +28,15 @@ public class UrlTests {
         assertTrue(Url.isUrl("https://www.google.com"));
     }
 
+    @Test
+    void isUrl_ReturnsTrue_WhenPassedARootRelativeUrl() {
+        assertTrue(Url.isUrl("/workspace/dewey"));
+        assertTrue(Url.isUrl("/workspace/diagrams?name=dewey"));
+    }
+
+    @Test
+    void isUrl_ReturnsFalse_WhenPassedAProtocolRelativeUrl() {
+        assertFalse(Url.isUrl("//example.com/workspace/dewey"));
+    }
+
 }
