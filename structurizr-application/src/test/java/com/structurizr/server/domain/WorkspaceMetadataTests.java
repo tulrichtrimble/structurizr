@@ -52,6 +52,18 @@ public class WorkspaceMetadataTests extends AbstractTestsBase {
     }
 
     @Test
+    void routingKey_RoundTripsViaProperties() {
+        WorkspaceMetadata workspace = new WorkspaceMetadata(1);
+        workspace.setApiKey("");
+        workspace.setRoutingKey("dewey");
+
+        Properties properties = workspace.toProperties();
+        WorkspaceMetadata hydratedWorkspace = WorkspaceMetadata.fromProperties(1, properties);
+
+        assertEquals("dewey", hydratedWorkspace.getRoutingKey());
+    }
+
+    @Test
     void addReadUser_WhenNull() {
         WorkspaceMetadata workspace = new WorkspaceMetadata(1);
         workspace.addReadUser(null);

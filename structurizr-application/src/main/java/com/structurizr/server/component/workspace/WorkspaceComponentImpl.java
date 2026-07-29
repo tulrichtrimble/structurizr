@@ -40,6 +40,7 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
     private static final Log log = LogFactory.getLog(WorkspaceComponent.class);
     private static final String ENCRYPTION_STRATEGY_STRING = "encryptionStrategy";
     private static final String CIPHERTEXT_STRING = "ciphertext";
+    private static final String ROUTING_KEY_PROPERTY = "key";
 
     private final WorkspaceAdapter workspaceAdapter;
     private final String encryptionPassphrase;
@@ -191,23 +192,23 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
     }
 
     @Override
-    public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) throws WorkspaceComponentException {
-        if (StringUtils.isNullOrEmpty(workspaceName)) {
-            throw new IllegalArgumentException("Workspace name cannot be null or empty");
+    public WorkspaceMetadata getWorkspaceMetadataByRoutingKey(String routingKey) throws WorkspaceComponentException {
+        if (StringUtils.isNullOrEmpty(routingKey)) {
+            throw new IllegalArgumentException("Routing key cannot be null or empty");
         }
 
-        String normalizedWorkspaceName = workspaceName.trim();
+        String normalizedRoutingKey = routingKey.trim();
         WorkspaceMetadata match = null;
 
         for (Long workspaceId : workspaceAdapter.getWorkspaceIds()) {
             WorkspaceMetadata workspaceMetadata = getWorkspaceMetadata(workspaceId);
-            if (workspaceMetadata == null) {
+            if (workspaceMetadata == null || StringUtils.isNullOrEmpty(workspaceMetadata.getRoutingKey())) {
                 continue;
             }
 
-            if (normalizedWorkspaceName.equalsIgnoreCase(workspaceMetadata.getName())) {
+            if (normalizedRoutingKey.equalsIgnoreCase(workspaceMetadata.getRoutingKey().trim())) {
                 if (match != null) {
-                    throw new WorkspaceComponentException("Multiple workspaces found with name: " + workspaceName);
+                    throw new WorkspaceComponentException("Multiple workspaces found with routing key: " + routingKey);
                 }
 
                 match = workspaceMetadata;
@@ -424,6 +425,7 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
                 try {
                     workspaceMetadata.setName(workspaceToBeStored.getName());
                     workspaceMetadata.setDescription(workspaceToBeStored.getDescription());
+                    workspaceMetadata.setRoutingKey(workspaceToBeStored.getProperties().get(ROUTING_KEY_PROPERTY));
 
                     // configure workspace visibility and users
                     if (configuration != null) {

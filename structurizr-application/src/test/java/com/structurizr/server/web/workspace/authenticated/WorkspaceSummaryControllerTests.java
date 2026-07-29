@@ -149,22 +149,4 @@ public class WorkspaceSummaryControllerTests extends AbstractTestsBase {
         assertEquals(1234567890L, model.getAttribute("autoRefreshLastModifiedDate"));
     }
 
-    @Test
-    void redirectToWorkspaceSummaryByName_RedirectsToCanonicalWorkspaceUrl() {
-        configureAsServerWithAuthenticationDisabled();
-
-        WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(2);
-        workspaceMetadata.setName("dewey");
-
-        controller.setWorkspaceComponent(new MockWorkspaceComponent() {
-            @Override
-            public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) {
-                return workspaceMetadata;
-            }
-        });
-
-        String view = controller.redirectToWorkspaceSummaryByName("dewey", "main", "5", model);
-        assertEquals("redirect:/workspace/2?branch=main&version=5", view);
-    }
-
 }

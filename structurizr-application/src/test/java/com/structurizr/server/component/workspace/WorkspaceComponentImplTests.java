@@ -332,9 +332,9 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
     }
 
     @Test
-    void getWorkspaceMetaDataByName_WhenTheWorkspaceExists() {
+    void getWorkspaceMetaDataByRoutingKey_WhenTheWorkspaceExists() {
         WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(1);
-        workspaceMetadata.setName("Dewey");
+        workspaceMetadata.setRoutingKey("Dewey");
 
         workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
             @Override
@@ -348,13 +348,13 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
             }
         });
 
-        assertSame(workspaceMetadata, workspaceComponent.getWorkspaceMetadata("dewey"));
+        assertSame(workspaceMetadata, workspaceComponent.getWorkspaceMetadataByRoutingKey("dewey"));
     }
 
     @Test
-    void getWorkspaceMetaDataByName_WhenTheWorkspaceIsArchived() {
+    void getWorkspaceMetaDataByRoutingKey_WhenTheWorkspaceIsArchived() {
         WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(1);
-        workspaceMetadata.setName("Dewey");
+        workspaceMetadata.setRoutingKey("Dewey");
         workspaceMetadata.setArchived(true);
 
         workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
@@ -369,16 +369,16 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
             }
         });
 
-        assertNull(workspaceComponent.getWorkspaceMetadata("dewey"));
+        assertNull(workspaceComponent.getWorkspaceMetadataByRoutingKey("dewey"));
     }
 
     @Test
-    void getWorkspaceMetaDataByName_ThrowsAnException_WhenMultipleWorkspacesMatch() {
+    void getWorkspaceMetaDataByRoutingKey_ThrowsAnException_WhenMultipleWorkspacesMatch() {
         WorkspaceMetadata workspaceMetadata1 = new WorkspaceMetadata(1);
-        workspaceMetadata1.setName("Dewey");
+        workspaceMetadata1.setRoutingKey("Dewey");
 
         WorkspaceMetadata workspaceMetadata2 = new WorkspaceMetadata(2);
-        workspaceMetadata2.setName("dewey");
+        workspaceMetadata2.setRoutingKey("dewey");
 
         workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
             @Override
@@ -392,7 +392,7 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
             }
         });
 
-        assertThrows(WorkspaceComponentException.class, () -> workspaceComponent.getWorkspaceMetadata("dewey"));
+        assertThrows(WorkspaceComponentException.class, () -> workspaceComponent.getWorkspaceMetadataByRoutingKey("dewey"));
     }
 
     @Test
@@ -712,6 +712,27 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
         workspaceComponent.putWorkspace(1, "", json);
 
         assertFalse(wmd.isPublicWorkspace());
+    }
+
+    @Test
+    void test_putWorkspace_UpdatesTheRoutingKey_WhenKeyPropertyIsSpecified() throws Exception {
+        Workspace workspace = new Workspace("Name", "Description");
+        workspace.addProperty("key", "dewey");
+
+        String json = WorkspaceUtils.toJson(workspace, false);
+
+        final WorkspaceMetadata wmd = new WorkspaceMetadata(1);
+
+        WorkspaceComponent workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public void putWorkspaceMetadata(WorkspaceMetadata workspaceMetaData) {
+                wmd.setRoutingKey(workspaceMetaData.getRoutingKey());
+            }
+        });
+
+        workspaceComponent.putWorkspace(1, "", json);
+
+        assertEquals("dewey", wmd.getRoutingKey());
     }
 
     @Test

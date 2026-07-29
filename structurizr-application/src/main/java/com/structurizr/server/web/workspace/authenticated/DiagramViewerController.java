@@ -3,9 +3,7 @@ package com.structurizr.server.web.workspace.authenticated;
 import com.structurizr.configuration.Configuration;
 import com.structurizr.configuration.Profile;
 import com.structurizr.configuration.StructurizrProperties;
-import com.structurizr.server.component.workspace.WorkspaceComponentException;
 import com.structurizr.server.domain.Permission;
-import com.structurizr.server.domain.WorkspaceMetadata;
 import com.structurizr.server.web.Views;
 import com.structurizr.util.HtmlUtils;
 import com.structurizr.util.StringUtils;
@@ -20,21 +18,6 @@ import java.util.Set;
 
 @Controller
 class DiagramViewerController extends AbstractWorkspaceController {
-
-    @RequestMapping(value = "/workspace/diagrams", method = RequestMethod.GET, params = "name")
-    String redirectToAuthenticatedDiagramViewerByName(
-            @RequestParam("name") String workspaceName,
-            @RequestParam(required = false, defaultValue = "") String branch,
-            @RequestParam(required = false) String version,
-            ModelMap model
-    ) {
-        WorkspaceMetadata workspaceMetadata = resolveWorkspaceByName(workspaceName);
-        if (workspaceMetadata == null) {
-            return show404Page(model);
-        }
-
-        return "redirect:" + buildDiagramViewerUrl(workspaceMetadata.getId(), branch, version);
-    }
 
     @RequestMapping(value = "/workspace/{workspaceId}/diagrams", method = RequestMethod.GET)
     String showAuthenticatedDiagramViewer(
@@ -68,30 +51,6 @@ class DiagramViewerController extends AbstractWorkspaceController {
                 },
                 branch, version, model, false, false
         );
-    }
-
-    private WorkspaceMetadata resolveWorkspaceByName(String workspaceName) {
-        try {
-            return workspaceComponent.getWorkspaceMetadata(workspaceName);
-        } catch (WorkspaceComponentException e) {
-            return null;
-        }
-    }
-
-    private String buildDiagramViewerUrl(long workspaceId, String branch, String version) {
-        StringBuilder url = new StringBuilder("/workspace/").append(workspaceId).append("/diagrams");
-        boolean hasQuery = false;
-
-        if (branch != null && !branch.isEmpty()) {
-            url.append("?branch=").append(branch);
-            hasQuery = true;
-        }
-
-        if (version != null && !version.isEmpty()) {
-            url.append(hasQuery ? "&" : "?").append("version=").append(version);
-        }
-
-        return url.toString();
     }
 
 }

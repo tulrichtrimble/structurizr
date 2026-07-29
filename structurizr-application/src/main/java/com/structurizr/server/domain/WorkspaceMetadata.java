@@ -38,10 +38,12 @@ public class WorkspaceMetadata {
     static final String READ_USERS_AND_ROLES_PROPERTY = "readUsers";
     static final String WRITE_USERS_AND_ROLES_PROPERTY = "writeUsers";
     static final String ARCHIVED_PROPERTY = "archived";
+    static final String ROUTING_KEY_PROPERTY = "routingKey";
 
     private final long id;
     private String name = "";
     private String description = "";
+    private String routingKey;
     private String version;
     private long size;
     private boolean clientSideEncrypted = false;
@@ -90,6 +92,14 @@ public class WorkspaceMetadata {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getRoutingKey() {
+        return routingKey;
+    }
+
+    public void setRoutingKey(String routingKey) {
+        this.routingKey = routingKey;
     }
 
     public String getVersion() {
@@ -466,6 +476,7 @@ public class WorkspaceMetadata {
         WorkspaceMetadata workspace = new WorkspaceMetadata(workspaceId);
         workspace.setName(properties.getProperty(NAME_PROPERTY));
         workspace.setDescription(properties.getProperty(DESCRIPTION_PROPERTY));
+        workspace.setRoutingKey(properties.getProperty(ROUTING_KEY_PROPERTY));
         workspace.setVersion(properties.getProperty(VERSION_PROPERTY));
         workspace.setClientSideEncrypted("true".equals(properties.getProperty(CLIENT_SIDE_ENCRYPTED_PROPERTY)));
         workspace.setLastModifiedUser(properties.getProperty(LAST_MODIFIED_USER_PROPERTY));
@@ -526,6 +537,12 @@ public class WorkspaceMetadata {
             properties.setProperty(DESCRIPTION_PROPERTY, this.getDescription());
         } else {
             properties.setProperty(DESCRIPTION_PROPERTY, "");
+        }
+
+        if (this.getRoutingKey() != null) {
+            properties.setProperty(ROUTING_KEY_PROPERTY, this.getRoutingKey());
+        } else {
+            properties.setProperty(ROUTING_KEY_PROPERTY, "");
         }
 
         if (this.getVersion() != null) {

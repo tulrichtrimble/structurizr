@@ -221,39 +221,6 @@ public class DiagramViewerControllerTests extends AbstractTestsBase {
     }
 
     @Test
-    void redirectToAuthenticatedDiagramViewerByName_RedirectsToCanonicalWorkspaceUrl() {
-        configureAsServerWithAuthenticationDisabled();
-
-        WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(2);
-        workspaceMetadata.setName("dewey");
-
-        controller.setWorkspaceComponent(new MockWorkspaceComponent() {
-            @Override
-            public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) {
-                return workspaceMetadata;
-            }
-        });
-
-        String view = controller.redirectToAuthenticatedDiagramViewerByName("dewey", "main", "5", model);
-        assertEquals("redirect:/workspace/2/diagrams?branch=main&version=5", view);
-    }
-
-    @Test
-    void redirectToAuthenticatedDiagramViewerByName_Returns404WhenNamedWorkspaceLookupFails() {
-        configureAsServerWithAuthenticationDisabled();
-
-        controller.setWorkspaceComponent(new MockWorkspaceComponent() {
-            @Override
-            public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) {
-                throw new WorkspaceComponentException("Duplicate workspace name");
-            }
-        });
-
-        String view = controller.redirectToAuthenticatedDiagramViewerByName("dewey", "", "", model);
-        assertEquals("404", view);
-    }
-
-    @Test
     void showAuthenticatedDiagramViewer_NumericWorkspaceUrlsRemainSupported() {
         configureAsServerWithAuthenticationDisabled();
 

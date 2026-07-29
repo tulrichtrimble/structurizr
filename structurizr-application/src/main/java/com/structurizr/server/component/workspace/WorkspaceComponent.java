@@ -19,7 +19,7 @@ public interface WorkspaceComponent {
 
     WorkspaceMetadata getWorkspaceMetadata(long workspaceId) throws WorkspaceComponentException;
 
-    WorkspaceMetadata getWorkspaceMetadata(String workspaceName) throws WorkspaceComponentException;
+    WorkspaceMetadata getWorkspaceMetadataByRoutingKey(String routingKey) throws WorkspaceComponentException;
 
     void putWorkspaceMetadata(WorkspaceMetadata workspaceMetadata);
 

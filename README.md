@@ -52,3 +52,7 @@ When configured, API uploads can pass a client-credentials OAuth access token vi
 ```bash
 java -jar structurizr-1.0.0.war push -url https://structurizr-app.example.com/api -id 2 -workspace ./workspace.json -key "$ACCESS_TOKEN" -merge false -archive true
 ```
+
+## Build
+
+`.\mvnw.cmd -pl structurizr-application -Pexclude-playwright -DskipTests package`

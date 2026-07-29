@@ -29,7 +29,7 @@ public abstract class MockWorkspaceComponent implements WorkspaceComponent {
     }
 
     @Override
-    public WorkspaceMetadata getWorkspaceMetadata(String workspaceName) {
+    public WorkspaceMetadata getWorkspaceMetadataByRoutingKey(String routingKey) {
         return null;
     }
 

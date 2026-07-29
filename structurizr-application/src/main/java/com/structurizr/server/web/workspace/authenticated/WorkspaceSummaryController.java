@@ -3,8 +3,6 @@ package com.structurizr.server.web.workspace.authenticated;
 import com.structurizr.configuration.Configuration;
 import com.structurizr.configuration.Features;
 import com.structurizr.configuration.Profile;
-import com.structurizr.server.component.workspace.WorkspaceComponentException;
-import com.structurizr.server.domain.WorkspaceMetadata;
 import com.structurizr.server.web.Views;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -15,21 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 class WorkspaceSummaryController extends AbstractWorkspaceController {
-
-    @RequestMapping(value = "/workspace", method = RequestMethod.GET, params = "name")
-    public String redirectToWorkspaceSummaryByName(
-            @RequestParam("name") String workspaceName,
-            @RequestParam(required = false, defaultValue = "") String branch,
-            @RequestParam(required = false) String version,
-            ModelMap model
-    ) {
-        WorkspaceMetadata workspaceMetadata = resolveWorkspaceByName(workspaceName);
-        if (workspaceMetadata == null) {
-            return show404Page(model);
-        }
-
-        return "redirect:" + buildWorkspaceSummaryUrl(workspaceMetadata.getId(), branch, version);
-    }
 
     @RequestMapping(value = "/workspace/{workspaceId}", method = RequestMethod.GET)
     public String showAuthenticatedWorkspaceSummary(
@@ -57,30 +40,6 @@ class WorkspaceSummaryController extends AbstractWorkspaceController {
                 },
                 branch, version, model, true, true
         );
-    }
-
-    private WorkspaceMetadata resolveWorkspaceByName(String workspaceName) {
-        try {
-            return workspaceComponent.getWorkspaceMetadata(workspaceName);
-        } catch (WorkspaceComponentException e) {
-            return null;
-        }
-    }
-
-    private String buildWorkspaceSummaryUrl(long workspaceId, String branch, String version) {
-        StringBuilder url = new StringBuilder("/workspace/").append(workspaceId);
-        boolean hasQuery = false;
-
-        if (branch != null && !branch.isEmpty()) {
-            url.append("?branch=").append(branch);
-            hasQuery = true;
-        }
-
-        if (version != null && !version.isEmpty()) {
-            url.append(hasQuery ? "&" : "?").append("version=").append(version);
-        }
-
-        return url.toString();
     }
 
 }
