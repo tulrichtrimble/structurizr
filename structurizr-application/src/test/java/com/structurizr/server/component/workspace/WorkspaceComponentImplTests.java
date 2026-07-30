@@ -902,6 +902,20 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
     }
 
     @Test
+    void createWorkspace_ThrowsException_WhenWorkspaceMetadataCannotBePersisted() {
+        WorkspaceComponent workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public void putWorkspaceMetadata(WorkspaceMetadata wmd) {
+                throw new RuntimeException("boom");
+            }
+        });
+
+        WorkspaceComponentException exception = assertThrows(WorkspaceComponentException.class, () -> workspaceComponent.createWorkspace(null));
+
+        assertEquals("Could not create workspace", exception.getMessage());
+    }
+
+    @Test
     void deleteWorkspace() {
         WorkspaceComponent workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
             @Override

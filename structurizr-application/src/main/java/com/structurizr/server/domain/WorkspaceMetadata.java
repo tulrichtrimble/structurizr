@@ -191,7 +191,11 @@ public class WorkspaceMetadata {
     }
 
     public String getSharingTokenTruncated() {
-        return (sharingToken == null ? "" : sharingToken.substring(0, 6)) + "...";
+        if (StringUtils.isNullOrEmpty(sharingToken)) {
+            return "";
+        }
+
+        return sharingToken.substring(0, Math.min(6, sharingToken.length())) + "...";
     }
 
     public boolean isArchived() {

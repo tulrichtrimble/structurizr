@@ -26,6 +26,10 @@ public class CreateCommand extends AbstractCommand {
         option.setRequired(false);
         options.addOption(option);
 
+        option = new Option("workspace-key", "workspaceKey", true, "Workspace routing key to create or resolve");
+        option.setRequired(false);
+        options.addOption(option);
+
         option = new Option("json", "json", false, "Output JSON");
         option.setRequired(false);
         options.addOption(option);
@@ -34,6 +38,7 @@ public class CreateCommand extends AbstractCommand {
 
         String apiUrl = "";
         String apiKey = "";
+        String workspaceKey = "";
         boolean json = false;
 
         try {
@@ -41,6 +46,7 @@ public class CreateCommand extends AbstractCommand {
 
             apiUrl = cmd.getOptionValue("apiUrl");
             apiKey = cmd.getOptionValue("apiKey");
+            workspaceKey = cmd.getOptionValue("workspaceKey");
             json = cmd.hasOption("json");
         } catch (ParseException e) {
             log.error(e.getMessage());
@@ -53,7 +59,7 @@ public class CreateCommand extends AbstractCommand {
         AdminApiClient client = new AdminApiClient(apiUrl, apiKey);
         client.setAgent(getAgent());
 
-        WorkspaceMetadata workspace = client.createWorkspace();
+        WorkspaceMetadata workspace = client.createWorkspace(workspaceKey);
 
         if (json) {
             ObjectMapper mapper = new ObjectMapper();

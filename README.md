@@ -24,6 +24,7 @@ This repository can be configured for enterprise-hosted deployments that require
 
 - OIDC sign-in for the web UI.
 - Token-based API authentication for workspace uploads.
+- Admin-key based workspace creation and key-based pushes.
 
 The key properties are:
 
@@ -47,12 +48,35 @@ structurizr.authentication.api.scopes=structurizr.upload
 structurizr.authentication.api.sharedtoken=
 ```
 
-When configured, API uploads can pass a client-credentials OAuth access token via `-key`, e.g.:
+When configured, numeric-ID workspace uploads can pass a client-credentials OAuth access token via `-key`, e.g.:
 
 ```bash
 java -jar structurizr-1.0.0.war push -url https://structurizr-app.example.com/api -id 2 -workspace ./workspace.json -key "$ACCESS_TOKEN" -merge false -archive true
 ```
 
-## Build
+For key-based pushes, define a stable workspace key in the workspace DSL:
 
-`.\mvnw.cmd -pl structurizr-application -Pexclude-playwright -DskipTests package`
+```dsl
+workspace {
+	properties {
+		key "dewey"
+	}
+}
+```
+
+Then use `push-key` with the server admin key:
+
+```bash
+java -jar structurizr-1.0.0.war push-key -url https://structurizr-app.example.com/api -workspace ./workspace.dsl --adminApiKey "$ADMIN_API_KEY" -merge false -archive true
+```
+
+`push-key` reads `properties.key` from the workspace definition and creates or resolves the target workspace automatically. It does not accept `-workspace-key`.
+
+Credential summary:
+
+- `push` uses a workspace API key or configured API bearer token for an existing numeric workspace ID.
+- `push-key` uses `--adminApiKey` with the server `ADMIN_API_KEY` because it may create the workspace before pushing to it.
+
+## Build
+ 
+`.\mvnw.cmd -pl structurizr-application -am -Pexclude-playwright -DskipTests package`

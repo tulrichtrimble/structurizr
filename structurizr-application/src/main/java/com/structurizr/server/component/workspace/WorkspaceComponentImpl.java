@@ -289,15 +289,10 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
                 workspaceId = workspaceIds.stream().reduce(0L, Long::max) + 1;
             }
 
-            try {
-                // create and write the workspace metadata
-                WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(workspaceId);
-                workspaceMetadata.regenerateApiKey();
-
-                putWorkspaceMetadata(workspaceMetadata);
-            } catch (Exception e) {
-                log.error(e);
-            }
+            // create and write the workspace metadata before storing workspace content
+            WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(workspaceId);
+            workspaceMetadata.regenerateApiKey();
+            putWorkspaceMetadata(workspaceMetadata);
 
             NumberFormat format = new DecimalFormat("0000");
             String dsl = DslTemplate.generate("Workspace " + format.format(workspaceId), "Description");
