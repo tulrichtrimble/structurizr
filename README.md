@@ -67,7 +67,7 @@ workspace {
 Then use `push-key` with the server admin key:
 
 ```bash
-java -jar structurizr-1.0.0.war push-key -url https://structurizr-app.example.com/api -workspace ./workspace.dsl --adminApiKey "$ADMIN_API_KEY" -merge false -archive true
+java -jar structurizr-1.0.0.war push-key -url https://structurizr-app.example.com/api -workspace ./workspace.json --adminApiKey "$ADMIN_API_KEY" -merge false -archive true
 ```
 
 `push-key` reads `properties.key` from the workspace definition and creates or resolves the target workspace automatically. It does not accept `-workspace-key`.

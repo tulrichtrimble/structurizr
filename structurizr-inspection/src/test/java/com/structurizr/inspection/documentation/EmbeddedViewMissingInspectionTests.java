@@ -7,8 +7,6 @@ import com.structurizr.documentation.Section;
 import com.structurizr.inspection.DefaultInspector;
 import com.structurizr.inspection.Severity;
 import com.structurizr.inspection.Violation;
-import com.structurizr.inspection.model.SoftwareSystemDocumentationInspection;
-import com.structurizr.model.Container;
 import com.structurizr.model.SoftwareSystem;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -87,5 +85,18 @@ public class EmbeddedViewMissingInspectionTests {
         Violation violation = new EmbeddedViewMissingInspection(new DefaultInspector(workspace)).run(softwareSystem);
         assertNull(violation);
     }
+
+        @Test
+        public void run_WithNullDocumentationContent() {
+                Workspace workspace = new Workspace("Name", "Description");
+                SoftwareSystem softwareSystem = workspace.getModel().addSoftwareSystem("Software System");
+
+                Section section = new Section();
+                section.setFormat(Format.Markdown);
+                softwareSystem.getDocumentation().addSection(section);
+
+                Violation violation = new EmbeddedViewMissingInspection(new DefaultInspector(workspace)).run(softwareSystem);
+                assertNull(violation);
+        }
 
 }

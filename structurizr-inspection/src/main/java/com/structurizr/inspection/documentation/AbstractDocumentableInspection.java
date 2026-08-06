@@ -56,6 +56,10 @@ public abstract class AbstractDocumentableInspection extends Inspection {
     private Set<String> findEmbeddedViewKeys(DocumentationContent content) {
         Set<String> keys = new LinkedHashSet<>();
 
+        if (content.getContent() == null) {
+            return keys;
+        }
+
         String[] lines = content.getContent().split("\n");
         for (String line : lines) {
             if (content.getFormat() == Format.Markdown) {
