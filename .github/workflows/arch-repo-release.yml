@@ -1,0 +1,79 @@
+name: Arch Repo Release
+
+on:
+  push:
+    tags:
+      - "release-*"
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release (for example: release-2026.08.08.1)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.release.tag_name || github.ref_name || github.event.inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            echo "value=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout tag source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.value }}
+          fetch-depth: 0
+
+      - name: Validate manual tag exists
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git rev-parse --verify "refs/tags/${{ steps.tag.outputs.value }}" >/dev/null
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Build WAR
+        run: ./mvnw -B -pl structurizr-application -am -Pexclude-playwright -Dmaven.test.skip=true -DexcludedGroups=IntegrationTest package
+
+      - name: Generate checksum
+        run: |
+          cd structurizr-application/target
+          sha256sum structurizr-1.0.0.war > structurizr-1.0.0.war.sha256
+
+      - name: Create or update release with assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.value }}
+          name: ${{ steps.tag.outputs.value }}
+          make_latest: true
+          append_body: true
+          body: |
+            Automated build from tag `${{ steps.tag.outputs.value }}`.
+          files: |
+            structurizr-application/target/structurizr-1.0.0.war
+            structurizr-application/target/structurizr-1.0.0.war.sha256
+          fail_on_unmatched_files: true
+          overwrite_files: true
