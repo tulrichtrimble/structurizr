@@ -56,7 +56,7 @@ jobs:
           cache: "maven"
 
       - name: Build WAR
-        run: mvn -B -pl structurizr-application -am -Pexclude-playwright -DskipTests package
+        run: ./mvnw -B -pl structurizr-application -am -Pexclude-playwright -Dmaven.test.skip=true -DexcludedGroups=IntegrationTest package
 
       - name: Generate checksum
         run: |
