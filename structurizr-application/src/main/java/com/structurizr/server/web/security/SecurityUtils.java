@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -24,6 +25,7 @@ public final class SecurityUtils {
     static {
         registerAuthenticationExtractor(AnonymousAuthenticationToken.class, new AnonymousAuthenticationExtractor());
         registerAuthenticationExtractor(UsernamePasswordAuthenticationToken.class, new UsernamePasswordAuthenticationExtractor());
+        registerAuthenticationExtractor(OAuth2AuthenticationToken.class, new OidcAuthenticationExtractor());
     }
 
     public static void registerAuthenticationExtractor(Class<? extends Authentication> clazz, AuthenticationExtractor extractor) {

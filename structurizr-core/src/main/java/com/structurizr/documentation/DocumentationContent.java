@@ -76,6 +76,10 @@ public abstract class DocumentationContent {
     public Set<String> findImages() {
         Set<String> images = new HashSet<>();
 
+        if (content == null) {
+            return images;
+        }
+
         Pattern pattern;
         if (format == Format.Markdown) {
             pattern = IMAGE_IN_MARKDOWN_PATTERN;

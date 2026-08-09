@@ -254,6 +254,20 @@ public class ModelItemTests extends AbstractWorkspaceTestBase {
     }
 
     @Test
+    void setUrl_AcceptsARootRelativeUrl() {
+        Element element = model.addSoftwareSystem("Name");
+        element.setUrl("/workspace/dewey");
+        assertEquals("/workspace/dewey", element.getUrl());
+    }
+
+    @Test
+    void setUrl_AcceptsARootRelativeUrlWithQueryString() {
+        Element element = model.addSoftwareSystem("Name");
+        element.setUrl("/workspace/diagrams?name=dewey");
+        assertEquals("/workspace/diagrams?name=dewey", element.getUrl());
+    }
+
+    @Test
     void setUrl_AcceptsAnInterWorkspaceUrl() {
         Element element = model.addSoftwareSystem("Name");
 

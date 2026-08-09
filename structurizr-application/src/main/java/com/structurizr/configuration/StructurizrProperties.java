@@ -30,6 +30,24 @@ public class StructurizrProperties {
     public static final String AUTHENTICATION_IMPLEMENTATION = "structurizr.authentication";
     public static final String AUTHENTICATION_VARIANT_NONE = "none";
     public static final String AUTHENTICATION_VARIANT_FILE = "file";
+    public static final String AUTHENTICATION_VARIANT_OIDC = "oidc";
+
+    public static final String AUTHENTICATION_OIDC_REGISTRATION_ID = "structurizr.authentication.oidc.registrationid";
+    public static final String AUTHENTICATION_OIDC_ISSUER_URI = "structurizr.authentication.oidc.issueruri";
+    public static final String AUTHENTICATION_OIDC_CLIENT_ID = "structurizr.authentication.oidc.clientid";
+    public static final String AUTHENTICATION_OIDC_CLIENT_SECRET = "structurizr.authentication.oidc.clientsecret";
+    public static final String AUTHENTICATION_OIDC_SCOPES = "structurizr.authentication.oidc.scopes";
+    public static final String AUTHENTICATION_OIDC_AUTHORIZATION_URI = "structurizr.authentication.oidc.authorizationuri";
+    public static final String AUTHENTICATION_OIDC_TOKEN_URI = "structurizr.authentication.oidc.tokenuri";
+    public static final String AUTHENTICATION_OIDC_JWK_SET_URI = "structurizr.authentication.oidc.jwkseturi";
+    public static final String AUTHENTICATION_OIDC_USER_INFO_URI = "structurizr.authentication.oidc.userinfouri";
+    public static final String AUTHENTICATION_OIDC_USERNAME_CLAIM = "structurizr.authentication.oidc.usernameclaim";
+
+    public static final String AUTHENTICATION_API_SHARED_TOKEN = "structurizr.authentication.api.sharedtoken";
+    public static final String AUTHENTICATION_API_TOKEN_ISSUER_URI = "structurizr.authentication.api.issueruri";
+    public static final String AUTHENTICATION_API_TOKEN_JWK_SET_URI = "structurizr.authentication.api.jwkseturi";
+    public static final String AUTHENTICATION_API_TOKEN_AUDIENCE = "structurizr.authentication.api.audience";
+    public static final String AUTHENTICATION_API_TOKEN_SCOPES = "structurizr.authentication.api.scopes";
 
     public static final String SESSION_IMPLEMENTATION = "structurizr.session";
     public static final String SESSION_VARIANT_LOCAL = "local";

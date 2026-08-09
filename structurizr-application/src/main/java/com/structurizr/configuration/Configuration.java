@@ -294,6 +294,23 @@ public class Configuration {
             setDefault(CACHE_EXPIRY_IN_MINUTES, DEFAULT_CACHE_EXPIRY_IN_MINUTES);
             setDefault(ADMIN_USERS_AND_ROLES, "");
 
+            setDefault(AUTHENTICATION_OIDC_REGISTRATION_ID, "trimble");
+            setDefault(AUTHENTICATION_OIDC_ISSUER_URI, "");
+            setDefault(AUTHENTICATION_OIDC_CLIENT_ID, "");
+            setDefault(AUTHENTICATION_OIDC_CLIENT_SECRET, "");
+            setDefault(AUTHENTICATION_OIDC_SCOPES, "openid,profile,email");
+            setDefault(AUTHENTICATION_OIDC_AUTHORIZATION_URI, "");
+            setDefault(AUTHENTICATION_OIDC_TOKEN_URI, "");
+            setDefault(AUTHENTICATION_OIDC_JWK_SET_URI, "");
+            setDefault(AUTHENTICATION_OIDC_USER_INFO_URI, "");
+            setDefault(AUTHENTICATION_OIDC_USERNAME_CLAIM, "email");
+
+            setDefault(AUTHENTICATION_API_SHARED_TOKEN, "");
+            setDefault(AUTHENTICATION_API_TOKEN_ISSUER_URI, "");
+            setDefault(AUTHENTICATION_API_TOKEN_JWK_SET_URI, "");
+            setDefault(AUTHENTICATION_API_TOKEN_AUDIENCE, "");
+            setDefault(AUTHENTICATION_API_TOKEN_SCOPES, "");
+
             setDefault(Features.UI_DSL_EDITOR, FALSE);
             setDefault(Features.WORKSPACE_ARCHIVING, FALSE);
             setDefault(Features.WORKSPACE_BRANCHES, FALSE);

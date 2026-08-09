@@ -2,8 +2,11 @@ package com.structurizr.server.domain;
 
 import com.structurizr.configuration.Configuration;
 import com.structurizr.configuration.StructurizrProperties;
+import com.structurizr.server.web.security.ApiAuthenticationUtils;
 import com.structurizr.util.DateUtils;
 import com.structurizr.util.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.text.ParseException;
@@ -13,6 +16,8 @@ import java.util.*;
 import static com.structurizr.util.DateUtils.UTC_TIME_ZONE;
 
 public class WorkspaceMetadata {
+
+    private static final Log log = LogFactory.getLog(WorkspaceMetadata.class);
 
     public static final int LOCK_TIMEOUT_IN_MINUTES = 2;
 
@@ -33,10 +38,12 @@ public class WorkspaceMetadata {
     static final String READ_USERS_AND_ROLES_PROPERTY = "readUsers";
     static final String WRITE_USERS_AND_ROLES_PROPERTY = "writeUsers";
     static final String ARCHIVED_PROPERTY = "archived";
+    static final String ROUTING_KEY_PROPERTY = "routingKey";
 
     private final long id;
     private String name = "";
     private String description = "";
+    private String routingKey;
     private String version;
     private long size;
     private boolean clientSideEncrypted = false;
@@ -87,6 +94,14 @@ public class WorkspaceMetadata {
         this.description = description;
     }
 
+    public String getRoutingKey() {
+        return routingKey;
+    }
+
+    public void setRoutingKey(String routingKey) {
+        this.routingKey = routingKey;
+    }
+
     public String getVersion() {
         return version;
     }
@@ -129,8 +144,16 @@ public class WorkspaceMetadata {
         String adminApiKey = Configuration.getInstance().getProperty(StructurizrProperties.API_KEY);
         if (!StringUtils.isNullOrEmpty(adminApiKey)) {
             // does the given API key match the bcrypt encoded admin API key?
-            return bcryptEncoder.matches(key, adminApiKey);
+            if (bcryptEncoder.matches(key, adminApiKey)) {
+                return true;
+            }
         }
+
+        if (ApiAuthenticationUtils.isSharedApiTokenValid(key)) {
+            return true;
+        }
+
+        log.warn("Workspace API credential rejected");
 
         return false;
     }
@@ -168,7 +191,11 @@ public class WorkspaceMetadata {
     }
 
     public String getSharingTokenTruncated() {
-        return (sharingToken == null ? "" : sharingToken.substring(0, 6)) + "...";
+        if (StringUtils.isNullOrEmpty(sharingToken)) {
+            return "";
+        }
+
+        return sharingToken.substring(0, Math.min(6, sharingToken.length())) + "...";
     }
 
     public boolean isArchived() {
@@ -453,6 +480,7 @@ public class WorkspaceMetadata {
         WorkspaceMetadata workspace = new WorkspaceMetadata(workspaceId);
         workspace.setName(properties.getProperty(NAME_PROPERTY));
         workspace.setDescription(properties.getProperty(DESCRIPTION_PROPERTY));
+        workspace.setRoutingKey(properties.getProperty(ROUTING_KEY_PROPERTY));
         workspace.setVersion(properties.getProperty(VERSION_PROPERTY));
         workspace.setClientSideEncrypted("true".equals(properties.getProperty(CLIENT_SIDE_ENCRYPTED_PROPERTY)));
         workspace.setLastModifiedUser(properties.getProperty(LAST_MODIFIED_USER_PROPERTY));
@@ -513,6 +541,12 @@ public class WorkspaceMetadata {
             properties.setProperty(DESCRIPTION_PROPERTY, this.getDescription());
         } else {
             properties.setProperty(DESCRIPTION_PROPERTY, "");
+        }
+
+        if (this.getRoutingKey() != null) {
+            properties.setProperty(ROUTING_KEY_PROPERTY, this.getRoutingKey());
+        } else {
+            properties.setProperty(ROUTING_KEY_PROPERTY, "");
         }
 
         if (this.getVersion() != null) {

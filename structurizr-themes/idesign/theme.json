@@ -1,0 +1,61 @@
+{
+"name": "IDesign",
+"description": "This theme is based on the iDesign color palette.",
+"elements": [
+{
+"tag": "idesign-client",
+"background": "#d9ead3",
+"color": "#252a2e"
+},
+{
+"tag": "idesign-mgr",
+"background": "#fff2cc",
+"color": "#252a2e"
+},
+{
+"tag": "idesign-engine",
+"background": "#fce5cd",
+"color": "#252a2e"
+},
+{
+"tag": "idesign-resource-access",
+"background": "#cccccc",
+"color": "#252a2e"
+},
+{
+"tag": "idesign-resource",
+"background": "#cfe2f3",
+"color": "#252a2e"
+},
+{
+"tag": "idesign-utility",
+"background": "#ead1dc",
+"color": "#252a2e"
+},
+{
+"tag": "database",
+"shape": "Cylinder"
+},
+{
+"tag": "messaging",
+"shape": "Pipe"
+}
+],
+"relationships": [
+{
+"tag": "sync",
+"color": "#000000",
+"dashed": false
+},
+{
+"tag": "async-durable",
+"color": "#000000",
+"dashed": true
+},
+{
+"tag": "async-transient",
+"color": "#999999",
+"dashed": true
+}
+]
+}

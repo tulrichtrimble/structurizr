@@ -56,6 +56,16 @@ public abstract class AbstractServer extends SpringBootServletInitializer {
 	}
 
 	@Bean
+	public FilterRegistrationBean<? extends Filter> workspaceNameRedirectFilterRegistration(com.structurizr.server.web.WorkspaceNameRedirectFilter filter) {
+		FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
+		registrationBean.setFilter(filter);
+		registrationBean.addUrlPatterns("/workspace", "/workspace/*");
+		registrationBean.setOrder(1);
+
+		return registrationBean;
+	}
+
+	@Bean
 	public ConfigurableServletWebServerFactory configurableServletWebServerFactory ( ) {
 		return new TomcatServletWebServerFactory() {
 			@Override

@@ -18,6 +18,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
     private final PrintWriter printWriter = new PrintWriter(stringWriter);
     private final List<Integer> bytes = new ArrayList<>();
     private String contentType;
+    private String redirectedUrl;
 
     String getContent() {
         return stringWriter.toString();
@@ -44,7 +45,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
     @Override
     public String encodeRedirectURL(String s) {
-        return null;
+        return s;
     }
 
     @Override
@@ -59,7 +60,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
     @Override
     public void sendRedirect(String s) throws IOException {
+        this.status = SC_FOUND;
+        this.redirectedUrl = s;
+    }
 
+    String getRedirectedUrl() {
+        return redirectedUrl;
     }
 
     @Override

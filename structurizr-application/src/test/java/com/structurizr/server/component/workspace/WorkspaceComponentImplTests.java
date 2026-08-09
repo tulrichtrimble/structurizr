@@ -332,6 +332,70 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
     }
 
     @Test
+    void getWorkspaceMetaDataByRoutingKey_WhenTheWorkspaceExists() {
+        WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(1);
+        workspaceMetadata.setRoutingKey("Dewey");
+
+        workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public List<Long> getWorkspaceIds() {
+                return List.of(1L);
+            }
+
+            @Override
+            public WorkspaceMetadata getWorkspaceMetadata(long workspaceId) {
+                return workspaceMetadata;
+            }
+        });
+
+        assertSame(workspaceMetadata, workspaceComponent.getWorkspaceMetadataByRoutingKey("dewey"));
+    }
+
+    @Test
+    void getWorkspaceMetaDataByRoutingKey_WhenTheWorkspaceIsArchived() {
+        WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(1);
+        workspaceMetadata.setRoutingKey("Dewey");
+        workspaceMetadata.setArchived(true);
+
+        workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public List<Long> getWorkspaceIds() {
+                return List.of(1L);
+            }
+
+            @Override
+            public WorkspaceMetadata getWorkspaceMetadata(long workspaceId) {
+                return workspaceMetadata;
+            }
+        });
+
+        assertNull(workspaceComponent.getWorkspaceMetadataByRoutingKey("dewey"));
+    }
+
+    @Test
+    void getWorkspaceMetaDataByRoutingKey_ThrowsAnException_WhenMultipleWorkspacesMatch() {
+        WorkspaceMetadata workspaceMetadata1 = new WorkspaceMetadata(1);
+        workspaceMetadata1.setRoutingKey("Dewey");
+
+        WorkspaceMetadata workspaceMetadata2 = new WorkspaceMetadata(2);
+        workspaceMetadata2.setRoutingKey("dewey");
+
+        workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public List<Long> getWorkspaceIds() {
+                return List.of(1L, 2L);
+            }
+
+            @Override
+            public WorkspaceMetadata getWorkspaceMetadata(long workspaceId) {
+                return workspaceId == 1L ? workspaceMetadata1 : workspaceMetadata2;
+            }
+        });
+
+        assertThrows(WorkspaceComponentException.class, () -> workspaceComponent.getWorkspaceMetadataByRoutingKey("dewey"));
+    }
+
+    @Test
     void putWorkspaceMetadata_ThrowsAnException_WhenPassedNull() {
         workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter());
 
@@ -651,6 +715,27 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
     }
 
     @Test
+    void test_putWorkspace_UpdatesTheRoutingKey_WhenKeyPropertyIsSpecified() throws Exception {
+        Workspace workspace = new Workspace("Name", "Description");
+        workspace.addProperty("key", "dewey");
+
+        String json = WorkspaceUtils.toJson(workspace, false);
+
+        final WorkspaceMetadata wmd = new WorkspaceMetadata(1);
+
+        WorkspaceComponent workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public void putWorkspaceMetadata(WorkspaceMetadata workspaceMetaData) {
+                wmd.setRoutingKey(workspaceMetaData.getRoutingKey());
+            }
+        });
+
+        workspaceComponent.putWorkspace(1, "", json);
+
+        assertEquals("dewey", wmd.getRoutingKey());
+    }
+
+    @Test
     void test_putWorkspace_UpdatesTheRoleBasedSecurity_WhenUsersAreDefined() throws Exception {
         configureAsServerWithAuthenticationEnabled();
 
@@ -814,6 +899,20 @@ public class WorkspaceComponentImplTests extends AbstractTestsBase {
         Workspace workspace = WorkspaceUtils.fromJson(jsonBuffer.toString());
         assertEquals(1, workspace.getId());
         assertEquals("Workspace 0001", workspace.getName());
+    }
+
+    @Test
+    void createWorkspace_ThrowsException_WhenWorkspaceMetadataCannotBePersisted() {
+        WorkspaceComponent workspaceComponent = new WorkspaceComponentImpl(new MockWorkspaceAdapter() {
+            @Override
+            public void putWorkspaceMetadata(WorkspaceMetadata wmd) {
+                throw new RuntimeException("boom");
+            }
+        });
+
+        WorkspaceComponentException exception = assertThrows(WorkspaceComponentException.class, () -> workspaceComponent.createWorkspace(null));
+
+        assertEquals("Could not create workspace", exception.getMessage());
     }
 
     @Test

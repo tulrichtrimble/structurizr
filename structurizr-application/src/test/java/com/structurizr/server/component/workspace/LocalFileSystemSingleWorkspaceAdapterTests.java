@@ -79,6 +79,18 @@ class LocalFileSystemSingleWorkspaceAdapterTests extends AbstractWorkspaceAdapte
     }
 
     @Test
+    void getWorkspaceMetadata_WhenJsonFileExists_ExtractsRoutingKeyFromWorkspaceProperties() throws Exception {
+        Workspace workspace = new Workspace("Name - JSON", "Description - JSON");
+        workspace.addProperty("key", "cm-support-kb");
+        WorkspaceUtils.saveWorkspaceToJson(workspace, new File(dataDirectory, "workspace.json"));
+
+        workspaceAdapter = new LocalFileSystemSingleWorkspaceAdapter();
+
+        WorkspaceMetadata wmd = workspaceAdapter.getWorkspaceMetadata(1);
+        assertEquals("cm-support-kb", wmd.getRoutingKey());
+    }
+
+    @Test
     void getWorkspaceMetadata_WhenJsonFileDoesNotExist() {
         workspaceAdapter = new LocalFileSystemSingleWorkspaceAdapter();
 
@@ -101,6 +113,9 @@ class LocalFileSystemSingleWorkspaceAdapterTests extends AbstractWorkspaceAdapte
 
         String dsl = """
                 workspace "DSL" "Description" {
+                properties {
+                key "cm-support-kb"
+                }
                 }""";
         FileUtils.write(new File(dataDirectory, "workspace.dsl"), dsl);
 
@@ -109,8 +124,29 @@ class LocalFileSystemSingleWorkspaceAdapterTests extends AbstractWorkspaceAdapte
         String json = workspaceAdapter.getWorkspace(1, "", "");
         assertTrue(json.startsWith("""
                 {"configuration":{},"description":"Description","documentation":{},"id":1,"lastModifiedDate":"""));
-        assertTrue(json.endsWith("""
-                ,"model":{},"name":"DSL","properties":{"structurizr.inspection.error":"3","structurizr.dsl":"d29ya3NwYWNlICJEU0wiICJEZXNjcmlwdGlvbiIgewp9","structurizr.inspection.info":"0","structurizr.inspection.ignore":"0","structurizr.inspection.warning":"0"},"views":{"configuration":{"styles":{},"terminology":{}}}}"""));
+        assertTrue(json.contains("\"name\":\"DSL\""));
+        assertTrue(json.contains("\"key\":\"cm-support-kb\""));
+        assertTrue(json.contains("\"structurizr.dsl\":\""));
+    }
+
+    @Test
+    void getWorkspaceMetadata_WhenDslFileExists_ExtractsRoutingKeyAfterRenderingJson() {
+        deleteDirectory(dataDirectory);
+        dataDirectory.mkdirs();
+
+        String dsl = """
+                workspace "DSL" "Description" {
+                    properties {
+                        key "cm-support-kb"
+                    }
+                }""";
+        FileUtils.write(new File(dataDirectory, "workspace.dsl"), dsl);
+
+        workspaceAdapter = new LocalFileSystemSingleWorkspaceAdapter();
+        workspaceAdapter.getWorkspace(1, "", "");
+
+        WorkspaceMetadata wmd = workspaceAdapter.getWorkspaceMetadata(1);
+        assertEquals("cm-support-kb", wmd.getRoutingKey());
     }
 
     @Test

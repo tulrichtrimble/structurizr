@@ -11,6 +11,7 @@ public class Url {
 
     private static final String HTTPS_PROTOCOL = "https://";
     private static final String HTTP_PROTOCOL = "http://";
+    private static final String ROOT_RELATIVE_PREFIX = "/";
 
     public static final String INTRA_WORKSPACE_URL_PREFIX = "{workspace}";
     public static final String INTER_WORKSPACE_URL_REGEX = "\\{workspace:\\d+\\}.*";
@@ -23,6 +24,10 @@ public class Url {
      */
     public static boolean isUrl(String urlAsString) {
         if (!StringUtils.isNullOrEmpty(urlAsString)) {
+            if (isRootRelativeUrl(urlAsString)) {
+                return true;
+            }
+
             try {
                 URI.create(urlAsString).toURL();
                 return true;
@@ -32,6 +37,10 @@ public class Url {
         }
 
         return false;
+    }
+
+    private static boolean isRootRelativeUrl(String urlAsString) {
+        return urlAsString.startsWith(ROOT_RELATIVE_PREFIX) && !urlAsString.startsWith("//");
     }
 
     /**

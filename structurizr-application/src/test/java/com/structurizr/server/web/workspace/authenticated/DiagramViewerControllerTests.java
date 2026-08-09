@@ -220,4 +220,26 @@ public class DiagramViewerControllerTests extends AbstractTestsBase {
         assertEquals(false, model.get("publishImages"));
     }
 
+    @Test
+    void showAuthenticatedDiagramViewer_NumericWorkspaceUrlsRemainSupported() {
+        configureAsServerWithAuthenticationDisabled();
+
+        final WorkspaceMetadata workspaceMetaData = new WorkspaceMetadata(1);
+        controller.setWorkspaceComponent(new MockWorkspaceComponent() {
+            @Override
+            public WorkspaceMetadata getWorkspaceMetadata(long workspaceId) {
+                return workspaceMetaData;
+            }
+
+            @Override
+            public String getWorkspace(long workspaceId, String branch, String version) throws WorkspaceComponentException {
+                return "json";
+            }
+        });
+
+        String view = controller.showAuthenticatedDiagramViewer(1, "", null, model);
+        assertEquals("diagrams", view);
+        assertEquals("/workspace/1", model.getAttribute("urlPrefix"));
+    }
+
 }

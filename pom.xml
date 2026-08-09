@@ -167,6 +167,7 @@
     <module>structurizr-import</module>
     <module>structurizr-inspection</module>
     <module>structurizr-application</module>
+    <module>structurizr-admin-api</module>
     <module>structurizr-mcp</module>
   </modules>
 </project>

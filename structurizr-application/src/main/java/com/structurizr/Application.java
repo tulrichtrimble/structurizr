@@ -17,6 +17,7 @@ public class Application {
 		register(new ServerCommand());
 
 		register(new PushCommand());
+		register(new PushKeyCommand());
 		register(new PullCommand());
 		register(new LockCommand());
 		register(new UnlockCommand());

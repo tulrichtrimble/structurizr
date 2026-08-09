@@ -13,6 +13,8 @@ import java.util.*;
 public class MockHttpServletRequest implements HttpServletRequest {
 
     private String pathInfo;
+    private String method;
+    private String requestUri;
     private final Map<String,String> headers = new HashMap<>();
     private final Map<String,String> parameters = new HashMap<>();
     private StringReader stringReader;
@@ -71,7 +73,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
     @Override
     public String getMethod() {
-        return null;
+        return method;
+    }
+
+    void setMethod(String method) {
+        this.method = method;
     }
 
     void setPathInfo(String pathInfo) {
@@ -90,7 +96,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
     @Override
     public String getContextPath() {
-        return "/";
+        return "";
     }
 
     @Override
@@ -120,7 +126,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
     @Override
     public String getRequestURI() {
-        return null;
+        return requestUri;
+    }
+
+    void setRequestURI(String requestUri) {
+        this.requestUri = requestUri;
     }
 
     @Override
@@ -208,12 +218,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
     @Override
     public String[] getParameterValues(String s) {
-        return new String[0];
+        String value = parameters.get(s);
+        return value == null ? null : new String[] { value };
     }
 
     @Override
     public Map getParameterMap() {
-        return null;
+        Map<String, String[]> parameterMap = new HashMap<>();
+        parameters.forEach((key, value) -> parameterMap.put(key, new String[] { value }));
+        return parameterMap;
     }
 
     @Override

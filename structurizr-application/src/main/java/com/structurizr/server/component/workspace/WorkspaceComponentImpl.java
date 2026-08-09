@@ -40,6 +40,7 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
     private static final Log log = LogFactory.getLog(WorkspaceComponent.class);
     private static final String ENCRYPTION_STRATEGY_STRING = "encryptionStrategy";
     private static final String CIPHERTEXT_STRING = "ciphertext";
+    private static final String ROUTING_KEY_PROPERTY = "key";
 
     private final WorkspaceAdapter workspaceAdapter;
     private final String encryptionPassphrase;
@@ -191,6 +192,33 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
     }
 
     @Override
+    public WorkspaceMetadata getWorkspaceMetadataByRoutingKey(String routingKey) throws WorkspaceComponentException {
+        if (StringUtils.isNullOrEmpty(routingKey)) {
+            throw new IllegalArgumentException("Routing key cannot be null or empty");
+        }
+
+        String normalizedRoutingKey = routingKey.trim();
+        WorkspaceMetadata match = null;
+
+        for (Long workspaceId : workspaceAdapter.getWorkspaceIds()) {
+            WorkspaceMetadata workspaceMetadata = getWorkspaceMetadata(workspaceId);
+            if (workspaceMetadata == null || StringUtils.isNullOrEmpty(workspaceMetadata.getRoutingKey())) {
+                continue;
+            }
+
+            if (normalizedRoutingKey.equalsIgnoreCase(workspaceMetadata.getRoutingKey().trim())) {
+                if (match != null) {
+                    throw new WorkspaceComponentException("Multiple workspaces found with routing key: " + routingKey);
+                }
+
+                match = workspaceMetadata;
+            }
+        }
+
+        return match;
+    }
+
+    @Override
     public void putWorkspaceMetadata(WorkspaceMetadata workspaceMetadata) {
         if (workspaceMetadata == null) {
             throw new IllegalArgumentException("Workspace metadata cannot be null");
@@ -261,15 +289,10 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
                 workspaceId = workspaceIds.stream().reduce(0L, Long::max) + 1;
             }
 
-            try {
-                // create and write the workspace metadata
-                WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(workspaceId);
-                workspaceMetadata.regenerateApiKey();
-
-                putWorkspaceMetadata(workspaceMetadata);
-            } catch (Exception e) {
-                log.error(e);
-            }
+            // create and write the workspace metadata before storing workspace content
+            WorkspaceMetadata workspaceMetadata = new WorkspaceMetadata(workspaceId);
+            workspaceMetadata.regenerateApiKey();
+            putWorkspaceMetadata(workspaceMetadata);
 
             NumberFormat format = new DecimalFormat("0000");
             String dsl = DslTemplate.generate("Workspace " + format.format(workspaceId), "Description");
@@ -397,6 +420,7 @@ class WorkspaceComponentImpl implements WorkspaceComponent {
                 try {
                     workspaceMetadata.setName(workspaceToBeStored.getName());
                     workspaceMetadata.setDescription(workspaceToBeStored.getDescription());
+                    workspaceMetadata.setRoutingKey(workspaceToBeStored.getProperties().get(ROUTING_KEY_PROPERTY));
 
                     // configure workspace visibility and users
                     if (configuration != null) {

@@ -3,6 +3,8 @@ package com.structurizr.server;
 import com.structurizr.configuration.Configuration;
 import com.structurizr.configuration.StructurizrProperties;
 import com.structurizr.view.ThemeUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.context.ApplicationListener;
@@ -15,6 +17,8 @@ import java.util.Properties;
 import static com.structurizr.configuration.StructurizrProperties.*;
 
 public class Server extends AbstractServer {
+
+	private static final Log log = LogFactory.getLog(Server.class);
 
 	public static void main(String[] args) {
 		Properties properties = new Properties();
@@ -29,7 +33,17 @@ public class Server extends AbstractServer {
 
 		List<String> profiles = new ArrayList<>();
 		profiles.add("command-server");
-		profiles.add("authentication-" + Configuration.getInstance().getProperty(AUTHENTICATION_IMPLEMENTATION));
+
+		String authImpl = Configuration.getInstance().getProperty(AUTHENTICATION_IMPLEMENTATION);
+		if (AUTHENTICATION_VARIANT_OIDC.equalsIgnoreCase(authImpl)) {
+			String issuerUri = Configuration.getInstance().getProperty(AUTHENTICATION_OIDC_ISSUER_URI);
+			String clientId = Configuration.getInstance().getProperty(AUTHENTICATION_OIDC_CLIENT_ID);
+			if (issuerUri == null || issuerUri.isBlank() || clientId == null || clientId.isBlank()) {
+				log.warn("structurizr.authentication=oidc but required OIDC properties (issuerUri, clientId) are missing; falling back to authentication=none");
+				authImpl = AUTHENTICATION_VARIANT_NONE;
+			}
+		}
+		profiles.add("authentication-" + authImpl);
 		profiles.add("session-" + Configuration.getInstance().getProperty(StructurizrProperties.SESSION_IMPLEMENTATION));
 
 		try {
