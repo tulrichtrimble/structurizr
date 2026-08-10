@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 concurrency:
   group: release-${{ github.event.release.tag_name || github.ref_name || github.event.inputs.tag }}
